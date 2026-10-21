@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=ntrack'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=ntrack'
+    # Bewusst ohne festen Host-Port: Spring liest den gemappten Port selbst aus
+    # "docker compose ps", und ein lokal laufendes Postgres kollidiert nicht.
+    ports:
+      - '5432'

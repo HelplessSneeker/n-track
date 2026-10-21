@@ -1,0 +1,41 @@
+# Die Tagesvorlagen. Mo/Mi/Fr ist werktag_morgen + gym, Di/Do werktag_morgen + laufen,
+# Sa samstag, So sonntag (die Zuordnung steht in Templates.java).
+#
+# Die Anfuehrungszeichen um die Uhrzeiten sind tragend: Ohne sie liest YAML "20:15"
+# als Sexagesimalzahl 1215, "08:00" dagegen als Text. Also immer quoten.
+# "24:00" heisst Mitternacht am Ende des Tages, liegt also auf dem Folgetag.
+
+werktag_morgen:
+  - titel: "Aufstehen: wiegen, LSF"
+  - titel: "Arbeitsweg: Lesen 20 min"
+  - { titel: "In der Daily: abhaken, Gewicht eintragen, Tagesplan ansehen", dauer: 1 }
+  - titel: "Arbeit, mittags Anki 10 min"
+gym:
+  - { titel: "Heimweg: Language Transfer 10 min", dauer: 30 }
+  - { titel: "Gym", dauer: 75 }
+  - { titel: "Kochen, Essen", dauer: 60 }
+  - { titel: "Meditieren 3 min, danach Handy in einen anderen Raum", dauer: 3 }
+  - { titel: "Deep Work", dauer: 60 }
+  - titel: "Aufgaben aus der Daily, wenn noch Zeit ist"
+  - { titel: "Feierabend", um: "20:15" }
+  - { titel: "Hautpflege", dauer: 10 }
+  - { titel: "Im Bett", um: "24:00" }
+laufen:
+  - { titel: "Laufen nach der Arbeit", dauer: 30 }
+  - { titel: "Heimweg: Language Transfer 10 min", dauer: 35 }
+  - { titel: "Duschen", dauer: 15 }
+  - { titel: "Kochen, Essen", dauer: 60 }
+  - { titel: "Meditieren 3 min, danach Handy in einen anderen Raum", dauer: 3 }
+  - { titel: "Deep Work", dauer: 60 }
+  - { titel: "Metalearning", dauer: 45 }
+  - titel: "Aufgaben aus der Daily, wenn noch Zeit ist"
+  - { titel: "Feierabend", um: "20:15" }
+  - { titel: "Hautpflege", dauer: 10 }
+  - { titel: "Im Bett", um: "24:00" }
+samstag:
+  - titel: "Vormittags: wiegen, LSF, Lesen 20 min, Spanisch"
+  - { titel: "Lab-Samstag mit Skitarii", dauer: 120 }
+  - titel: "Abends: Hautpflege, danach Meditieren 3 min"
+sonntag:
+  - titel: "Vormittags: wiegen, LSF, Lesen 20 min, Spanisch"
+  - titel: "Abends: Hautpflege, danach Meditieren 3 min"
