@@ -3,9 +3,9 @@
 Tagesplaner: Der Server kennt den Tagesplan, weiß, welcher Punkt gerade dran ist, und rechnet die
 Uhrzeiten des restlichen Tages ab jetzt. Spring Boot 4.1.1, Java 21, PostgreSQL.
 
-Jeder Tag entsteht aus einer Vorlage für seinen Wochentag. Wer weitertippt, hakt den aktuellen Punkt
-ab; alles dahinter rückt nach. Angular, Login und Deploy kommen später; ab Schritt 1b plant ein
-Sprachmodell auf Zuruf um, die Regeln und Uhrzeiten rechnet aber immer der Server.
+Jeder Tag entsteht aus einer Vorlage für seinen Wochentag. Abgehakt wird ein benannter Punkt, nicht
+„der aktuelle"; alles dahinter rückt nach. Angular, Login und Deploy kommen später; ab Schritt 1b
+plant ein Sprachmodell auf Zuruf um, die Regeln und Uhrzeiten rechnet aber immer der Server.
 
 ## Starten
 
@@ -40,6 +40,15 @@ Ende des Tages und liegt damit auf dem Folgetag — ein Client darf also nicht n
 sondern nach dem vollen Zeitstempel. Und erledigte Punkte sind Protokoll, nicht Rechnung: Ihr Ende
 ist der gemessene Zeitpunkt, eine feste Uhrzeit bleibt bei ihnen außen vor.
 
+## Der Tag wechselt um 04:00
+
+`ntrack.day-starts-at=04:00`: Vor dieser Uhrzeit gilt noch der Vortag. Um Mitternacht ist die
+Hautpflege ja noch offen, und würde der Tag dort wechseln, entstünde aus der Vorlage ein frisches
+Morgen, in dem „Aufstehen" um 00:05 erledigt wäre.
+
+Gerechnet wird der Vortag deshalb mit seinem eigenen Datum weiter — der Plan zeigt um 00:10 also
+folgerichtig „Im Bett 24:00: 10 min zu spät", statt auf morgen zu springen.
+
 ## Endpunkte
 
 Zeiten sind ISO-8601 mit Offset, auf die Minute genau. `start` und `end` sind `null`, wo es keine
@@ -47,21 +56,25 @@ Uhrzeit gibt.
 
 | | |
 |---|---|
-| `GET /api/today` | Der heutige Tag. Legt ihn aus der Wochentags-Vorlage an, falls es ihn noch nicht gibt — ein schreibender GET, bewusst so, und beim zweiten Aufruf ohne weitere Wirkung. |
-| `POST /api/today/next` | Der aktuelle Punkt ist jetzt erledigt. `409`, wenn der Tag schon komplett erledigt ist. |
-| `POST /api/today/back` | Nimmt das letzte Weiter zurück, für Fehltipps. `409`, wenn heute noch kein Punkt erledigt ist. |
+| `GET /api/today` | Der Tag, der jetzt gilt. Legt ihn aus der Wochentags-Vorlage an, falls es ihn noch nicht gibt — ein schreibender GET, bewusst so, und beim zweiten Aufruf ohne weitere Wirkung. |
+| `POST /api/items/{id}/done` | Dieser Punkt ist jetzt erledigt. Ist er es schon, ändert sich nichts (`200`) — ein Doppeltipp darf nicht zwei Punkte abhaken. `409`, wenn vor ihm noch ein Punkt offen ist. |
+| `DELETE /api/items/{id}/done` | Nimmt das zurück, für Fehltipps, aber nur beim letzten erledigten Punkt seines Tages; sonst `409`. Ist der Punkt nicht erledigt, ändert sich nichts (`200`). |
 
-Alle drei antworten gleich:
+Unbekannte `id`: `404`. Fehler kommen als `problem+json`, die Begründung steht in `detail`.
+
+Alle drei antworten gleich. Die beiden Punkt-Endpunkte antworten mit dem Plan **des Tages, zu dem der
+Punkt gehört**, nicht mit dem heutigen: Eine Ansicht, die um 00:10 noch auf dem Vortag steht, bekommt
+den Vortag zurück.
 
 ```json
 {
   "date": "2026-10-21",
   "now": "2026-10-21T17:30:00+02:00",
   "items": [
-    { "title": "Heimweg: Language Transfer 10 min", "start": "2026-10-21T17:30:00+02:00",
+    { "id": 5, "title": "Heimweg: Language Transfer 10 min", "start": "2026-10-21T17:30:00+02:00",
       "end": "2026-10-21T18:00:00+02:00", "status": "UPCOMING" },
-    { "title": "Aufgaben aus der Daily, wenn noch Zeit ist", "start": "2026-10-21T21:18:00+02:00",
-      "end": null, "status": "UPCOMING" }
+    { "id": 10, "title": "Aufgaben aus der Daily, wenn noch Zeit ist",
+      "start": "2026-10-21T21:18:00+02:00", "end": null, "status": "UPCOMING" }
   ],
   "warnings": [
     { "title": "Feierabend", "fixedAt": "20:15", "minutesLate": 63,
@@ -71,6 +84,8 @@ Alle drei antworten gleich:
 ```
 
 `status` ist `DONE`, `CURRENT` oder `UPCOMING`. Aktuell ist immer der erste nicht erledigte Punkt.
+Die `id` ist die Adresse zum Abhaken — ein Client sagt damit, welchen Punkt er meint, und ein
+wiederholter Versuch bei schlechtem Netz trifft denselben.
 
 ## Vorlagen
 
@@ -102,6 +117,7 @@ src/main/java/at/bfnoessler/ntrack/
     Status.java                 DONE, CURRENT, UPCOMING
   today/                      Web und Datenbank
     TodayController.java        die drei Endpunkte, Transaktionsgrenze je Request
+    DayClock.java               welcher Tagesplan jetzt gilt (ntrack.day-starts-at)
     Templates.java              vorlagen.yaml, beim Start eingelesen
     DayEntity.java  ItemEntity.java  DayRepository.java  ItemRepository.java
     TodayResponse.java  ItemResponse.java  WarningResponse.java
