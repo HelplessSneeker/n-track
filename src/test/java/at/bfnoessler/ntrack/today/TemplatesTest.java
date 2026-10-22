@@ -53,6 +53,15 @@ class TemplatesTest {
 	}
 
 	@Test
+	void readsFixedTimeAndDurationTogether() {
+		List<Item> items = templates.forDay(DayOfWeek.WEDNESDAY);
+
+		assertThat(items.get(11).title()).isEqualTo("Hautpflege");
+		assertThat(items.get(11).fixedAt()).isEqualTo(TimeOfDay.of("23:50"));
+		assertThat(items.get(11).duration()).isEqualTo(10);
+	}
+
+	@Test
 	void leavesTemplateItemsUndone() {
 		assertThat(templates.forDay(DayOfWeek.WEDNESDAY))
 				.allSatisfy(item -> assertThat(item.doneAt()).isNull());

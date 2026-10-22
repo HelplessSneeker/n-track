@@ -178,6 +178,9 @@ class TodayApiTest {
 				.andExpect(jsonPath("$.items[8].end").value("2026-10-21T21:18:00+02:00"))
 				.andExpect(jsonPath("$.items[9].start").value("2026-10-21T21:18:00+02:00"))
 				.andExpect(jsonPath("$.items[9].end").doesNotExist())
+				// Die Hautpflege haengt nicht am Feierabend, sie liegt vor dem Schlafengehen.
+				.andExpect(jsonPath("$.items[11].start").value("2026-10-21T23:50:00+02:00"))
+				.andExpect(jsonPath("$.items[11].end").value("2026-10-22T00:00:00+02:00"))
 				.andExpect(jsonPath("$.items[12].start").value("2026-10-22T00:00:00+02:00"))
 				.andExpect(jsonPath("$.warnings.length()").value(1))
 				.andExpect(jsonPath("$.warnings[0].title").value("Feierabend"))
