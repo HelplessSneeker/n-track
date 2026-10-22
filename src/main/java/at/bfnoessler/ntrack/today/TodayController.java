@@ -25,8 +25,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Der Tagesplan. Keine Service-Schicht: Die Transaktionsgrenze ist der Request, deshalb sitzt
- * {@code @Transactional} hier — und deshalb müssen die drei Methoden {@code public} sein, denn auf
- * nicht-öffentlichen Methoden ignoriert Spring die Annotation stillschweigend.
+ * {@code @Transactional} an den drei Endpunkten.
+ * <p>
+ * Die Falle dabei ist nicht die Sichtbarkeit — seit Spring 6.0 wirkt die Annotation bei
+ * Klassen-Proxys auch auf package-private Methoden —, sondern der Aufruf aus derselben Klasse: Der
+ * geht am Proxy vorbei und läuft ohne Transaktion. Hier kommt deshalb jeder Request von außen an
+ * einer annotierten Methode an, und die Helfer darunter tragen keine eigene Annotation.
  * <p>
  * Kein Mapping an der Klasse, weil die Punkte unter {@code /api/items} liegen und der Tag unter
  * {@code /api/today}. Ein zweiter Controller dafür müsste sich {@link #respond} teilen, und genau
