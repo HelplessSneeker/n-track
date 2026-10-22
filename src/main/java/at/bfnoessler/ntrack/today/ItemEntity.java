@@ -47,6 +47,14 @@ class ItemEntity {
 		return entity;
 	}
 
+	Integer getId() {
+		return id;
+	}
+
+	Integer getDayId() {
+		return dayId;
+	}
+
 	String getTitle() {
 		return title;
 	}

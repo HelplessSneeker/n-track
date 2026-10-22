@@ -17,8 +17,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -159,9 +161,9 @@ class TodayApiTest {
 	@Test
 	void countsTheRestOfTheDayFromNowOnceWorkIsTheCurrentItem() throws Exception {
 		mvc.perform(get("/api/today")).andExpect(status().isOk());
-		next();
-		next();
-		next();
+		done(0);
+		done(1);
+		done(2);
 
 		mvc.perform(get("/api/today"))
 				.andExpect(status().isOk())
@@ -186,10 +188,20 @@ class TodayApiTest {
 	}
 
 	@Test
-	void marksTheCurrentItemAsDoneAndMovesOn() throws Exception {
+	void givesEveryItemItsId() throws Exception {
 		mvc.perform(get("/api/today")).andExpect(status().isOk());
 
-		mvc.perform(post("/api/today/next"))
+		mvc.perform(get("/api/today"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].id").value(idAt(0)))
+				.andExpect(jsonPath("$.items[12].id").value(idAt(12)));
+	}
+
+	@Test
+	void marksTheNamedItemAsDoneAndMovesOn() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+
+		mvc.perform(post("/api/items/{id}/done", idAt(0)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].status").value("DONE"))
 				.andExpect(jsonPath("$.items[0].end").value("2026-10-21T17:30:00+02:00"))
@@ -197,16 +209,33 @@ class TodayApiTest {
 	}
 
 	@Test
-	void takesTheLastNextBack() throws Exception {
+	void marksAnItemOnlyOnceHoweverOftenItIsTapped() throws Exception {
 		mvc.perform(get("/api/today")).andExpect(status().isOk());
-		next();
-		next();
 
-		mvc.perform(get("/api/today"))
-				.andExpect(jsonPath("$.items[1].status").value("DONE"))
-				.andExpect(jsonPath("$.items[2].status").value("CURRENT"));
+		done(0);
+		mvc.perform(post("/api/items/{id}/done", idAt(0)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].status").value("DONE"))
+				.andExpect(jsonPath("$.items[1].status").value("CURRENT"));
+	}
 
-		mvc.perform(post("/api/today/back"))
+	@Test
+	void refusesToMarkAnItemThatIsNotDueYet() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+
+		mvc.perform(post("/api/items/{id}/done", idAt(3)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.detail")
+						.value("Dieser Punkt ist noch nicht dran, offen ist: Aufstehen: wiegen, LSF"));
+	}
+
+	@Test
+	void takesTheLastDoneItemBack() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+		done(0);
+		done(1);
+
+		mvc.perform(delete("/api/items/{id}/done", idAt(1)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].status").value("DONE"))
 				.andExpect(jsonPath("$.items[1].status").value("CURRENT"))
@@ -214,28 +243,64 @@ class TodayApiTest {
 	}
 
 	@Test
-	void refusesToGoOnWhenTheWholeDayIsDone() throws Exception {
+	void refusesToTakeBackAnEarlierDoneItem() throws Exception {
 		mvc.perform(get("/api/today")).andExpect(status().isOk());
-		for (int i = 0; i < 13; i++) {
-			next();
-		}
+		done(0);
+		done(1);
 
-		mvc.perform(post("/api/today/next"))
+		mvc.perform(delete("/api/items/{id}/done", idAt(0)))
 				.andExpect(status().isConflict())
-				.andExpect(jsonPath("$.detail").value("Der Tag ist schon komplett erledigt."));
+				.andExpect(jsonPath("$.detail").value("Zurücknehmen lässt sich nur der letzte "
+						+ "erledigte Punkt: Arbeitsweg: Lesen 20 min"));
 	}
 
 	@Test
-	void refusesToGoBackWhenNothingIsDoneYet() throws Exception {
+	void leavesAnItemThatIsNotDoneAloneWhenItIsTakenBack() throws Exception {
 		mvc.perform(get("/api/today")).andExpect(status().isOk());
 
-		mvc.perform(post("/api/today/back"))
-				.andExpect(status().isConflict())
-				.andExpect(jsonPath("$.detail").value("Heute ist noch kein Punkt erledigt."));
+		mvc.perform(delete("/api/items/{id}/done", idAt(0)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].status").value("CURRENT"));
 	}
 
-	private void next() throws Exception {
-		mvc.perform(post("/api/today/next")).andExpect(status().isOk());
+	@Test
+	void answersWithProblemJsonForAnUnknownItem() throws Exception {
+		mvc.perform(post("/api/items/{id}/done", 999999))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+				.andExpect(jsonPath("$.detail").value("Diesen Punkt gibt es nicht: 999999"));
+
+		mvc.perform(delete("/api/items/{id}/done", 999999))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+				.andExpect(jsonPath("$.detail").value("Diesen Punkt gibt es nicht: 999999"));
+	}
+
+	/** Der Fall, der die Ids motiviert: eine seit gestern offene Ansicht nach Mitternacht. */
+	@Test
+	void marksAnItemInItsOwnDayAfterMidnight() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+		Integer id = idAt(0);
+
+		clock.set(ZonedDateTime.of(2026, 10, 22, 0, 30, 0, 0, ZONE));
+
+		mvc.perform(post("/api/items/{id}/done", id))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.date").value("2026-10-21"))
+				.andExpect(jsonPath("$.items[0].status").value("DONE"))
+				.andExpect(jsonPath("$.items[0].end").value("2026-10-22T00:30:00+02:00"));
+
+		assertThat(days.count()).isOne();
+	}
+
+	private void done(int position) throws Exception {
+		mvc.perform(post("/api/items/{id}/done", idAt(position))).andExpect(status().isOk());
+	}
+
+	/** Die Id des Punktes an dieser Stelle des Mittwochs-Plans. */
+	private Integer idAt(int position) {
+		DayEntity day = days.findByDate(WEDNESDAY_EVENING.toLocalDate()).orElseThrow();
+		return items.findByDayIdOrderByPositionAsc(day.getId()).get(position).getId();
 	}
 
 }

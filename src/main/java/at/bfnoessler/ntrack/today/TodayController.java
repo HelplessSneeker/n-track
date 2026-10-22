@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import at.bfnoessler.ntrack.schedule.DaySchedule;
 import at.bfnoessler.ntrack.schedule.Item;
@@ -15,19 +16,23 @@ import at.bfnoessler.ntrack.schedule.Warning;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Der heutige Tag. Keine Service-Schicht: Die Transaktionsgrenze ist der Request, deshalb sitzt
+ * Der Tagesplan. Keine Service-Schicht: Die Transaktionsgrenze ist der Request, deshalb sitzt
  * {@code @Transactional} hier — und deshalb müssen die drei Methoden {@code public} sein, denn auf
  * nicht-öffentlichen Methoden ignoriert Spring die Annotation stillschweigend.
+ * <p>
+ * Kein Mapping an der Klasse, weil die Punkte unter {@code /api/items} liegen und der Tag unter
+ * {@code /api/today}. Ein zweiter Controller dafür müsste sich {@link #respond} teilen, und genau
+ * das wäre die Schicht, die hier nicht sein soll.
  */
 @RestController
-@RequestMapping("/api/today")
 class TodayController {
 
 	private final Clock clock;
@@ -50,34 +55,70 @@ class TodayController {
 	}
 
 	/** Legt den Tag aus der Vorlage für den Wochentag an, falls es ihn noch nicht gibt. */
-	@GetMapping
+	@GetMapping("/api/today")
 	@Transactional
 	public TodayResponse today() {
 		return respond(today(dayClock.date()));
 	}
 
-	/** Der aktuelle Punkt ist jetzt erledigt. */
-	@PostMapping("next")
+	/**
+	 * Dieser Punkt ist jetzt erledigt. Ist er es schon, ändert sich nichts: Ein Doppeltipp am Handy
+	 * und ein zweiter Versuch bei schlechtem Netz dürfen nicht zwei Punkte abhaken.
+	 */
+	@PostMapping("/api/items/{id}/done")
 	@Transactional
-	public TodayResponse next() {
-		DayEntity day = today(dayClock.date());
-		ItemEntity current = items.findFirstByDayIdAndDoneAtIsNullOrderByPositionAsc(day.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
-						"Der Tag ist schon komplett erledigt."));
-		current.setDoneAt(OffsetDateTime.now(clock));
-		return respond(day);
+	public TodayResponse done(@PathVariable Integer id) {
+		ItemEntity item = item(id);
+		if (item.getDoneAt() == null) {
+			ItemEntity current = items.findFirstByDayIdAndDoneAtIsNullOrderByPositionAsc(item.getDayId())
+					.orElseThrow(() -> new IllegalStateException(
+							"Punkt " + id + " ist offen, sein Tag aber komplett erledigt."));
+			if (!current.getId().equals(item.getId())) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT,
+						"Dieser Punkt ist noch nicht dran, offen ist: " + current.getTitle());
+			}
+			item.setDoneAt(OffsetDateTime.now(clock));
+		}
+		return respond(day(item));
 	}
 
-	/** Nimmt das letzte Weiter zurück, für Fehltipps. */
-	@PostMapping("back")
+	/**
+	 * Nimmt das Abhaken zurück, für Fehltipps — aber nur beim letzten erledigten Punkt seines Tages,
+	 * denn erledigt ist immer ein Anfangsstück des Tages. Ist der Punkt nicht erledigt, ändert sich
+	 * nichts.
+	 */
+	@DeleteMapping("/api/items/{id}/done")
 	@Transactional
-	public TodayResponse back() {
-		DayEntity day = today(dayClock.date());
-		ItemEntity last = items.findFirstByDayIdAndDoneAtIsNotNullOrderByPositionDesc(day.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
-						"Heute ist noch kein Punkt erledigt."));
-		last.setDoneAt(null);
-		return respond(day);
+	public TodayResponse undone(@PathVariable Integer id) {
+		ItemEntity item = item(id);
+		if (item.getDoneAt() != null) {
+			ItemEntity last = items.findFirstByDayIdAndDoneAtIsNotNullOrderByPositionDesc(item.getDayId())
+					.orElseThrow(() -> new IllegalStateException(
+							"Punkt " + id + " ist erledigt, sein Tag aber gar nicht angefangen."));
+			if (!last.getId().equals(item.getId())) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT,
+						"Zurücknehmen lässt sich nur der letzte erledigte Punkt: " + last.getTitle());
+			}
+			item.setDoneAt(null);
+		}
+		return respond(day(item));
+	}
+
+	private ItemEntity item(Integer id) {
+		return items.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+				"Diesen Punkt gibt es nicht: " + id));
+	}
+
+	/**
+	 * Der Tag, zu dem der Punkt gehört, und nicht der heutige: Eine seit gestern offene Ansicht soll
+	 * den Plan zurückbekommen, in dem sie gerade steht. Angelegt wird hier nichts — wenn es den Punkt
+	 * gibt, gibt es seinen Tag.
+	 */
+	private DayEntity day(ItemEntity item) {
+		return days.findById(item.getDayId())
+				.orElseThrow(() -> new IllegalStateException(
+						"Punkt " + item.getId() + " zeigt auf den Tag " + item.getDayId() + ", den es "
+								+ "nicht gibt."));
 	}
 
 	private DayEntity today(LocalDate date) {
@@ -93,15 +134,21 @@ class TodayController {
 		return day;
 	}
 
+	/**
+	 * Die Ids kommen aus den Zeilen und nicht aus {@link Item}: Das Rechen-Paket soll von Datenbank
+	 * nichts wissen. Beide Listen stehen in derselben Reihenfolge, denn {@code calculate} geht die
+	 * Punkte der Reihe nach durch.
+	 */
 	private TodayResponse respond(DayEntity day) {
 		ZonedDateTime now = ZonedDateTime.now(clock);
-		List<Item> plan = items.findByDayIdOrderByPositionAsc(day.getId()).stream()
-				.map(row -> toItem(row, now.getZone()))
-				.toList();
+		List<ItemEntity> rows = items.findByDayIdOrderByPositionAsc(day.getId());
+		List<Item> plan = rows.stream().map(row -> toItem(row, now.getZone())).toList();
 		DaySchedule schedule = DaySchedule.calculate(plan, day.getDate(), now);
 
 		return new TodayResponse(day.getDate(), now.toOffsetDateTime(),
-				schedule.items().stream().map(TodayController::toResponse).toList(),
+				IntStream.range(0, rows.size())
+						.mapToObj(i -> toResponse(rows.get(i).getId(), schedule.items().get(i)))
+						.toList(),
 				schedule.warnings().stream().map(TodayController::toResponse).toList());
 	}
 
@@ -115,9 +162,9 @@ class TodayController {
 				row.getDoneAt() == null ? null : row.getDoneAt().atZoneSameInstant(zone));
 	}
 
-	private static ItemResponse toResponse(ScheduledItem scheduled) {
-		return new ItemResponse(scheduled.item().title(), at(scheduled.start()), at(scheduled.end()),
-				scheduled.status());
+	private static ItemResponse toResponse(Integer id, ScheduledItem scheduled) {
+		return new ItemResponse(id, scheduled.item().title(), at(scheduled.start()),
+				at(scheduled.end()), scheduled.status());
 	}
 
 	private static WarningResponse toResponse(Warning warning) {
