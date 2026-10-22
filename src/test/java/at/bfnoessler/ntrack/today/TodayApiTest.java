@@ -1,6 +1,7 @@
 package at.bfnoessler.ntrack.today;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -38,14 +39,46 @@ class TodayApiTest {
 
 	private static final ZoneId ZONE = ZoneId.of("Europe/Vienna");
 
-	@TestConfiguration
-	static class FixedClockConfig {
+	/** Mittwoch, 21.10.2026, 17:30 — der Tag aus den Rechenbeispielen. */
+	private static final ZonedDateTime WEDNESDAY_EVENING = ZonedDateTime.of(2026, 10, 21, 17, 30, 0, 0,
+			ZONE);
 
-		/** Mittwoch, 21.10.2026, 17:30 — der Tag aus den Rechenbeispielen. */
+	/**
+	 * Eine Uhr, die ein Test weiterstellen kann. So reicht ein Spring-Kontext für alle Fälle, und der
+	 * Tageswechsel ist prüfbar, ohne den Kontext ein zweites Mal hochzufahren.
+	 */
+	static final class AdjustableClock extends Clock {
+
+		private volatile Instant instant = WEDNESDAY_EVENING.toInstant();
+
+		void set(ZonedDateTime time) {
+			this.instant = time.toInstant();
+		}
+
+		@Override
+		public Instant instant() {
+			return this.instant;
+		}
+
+		@Override
+		public ZoneId getZone() {
+			return ZONE;
+		}
+
+		@Override
+		public Clock withZone(ZoneId zone) {
+			throw new UnsupportedOperationException("Die Testuhr bleibt in " + ZONE);
+		}
+
+	}
+
+	@TestConfiguration
+	static class AdjustableClockConfig {
+
 		@Bean
 		@Primary
-		Clock fixedClock() {
-			return Clock.fixed(ZonedDateTime.of(2026, 10, 21, 17, 30, 0, 0, ZONE).toInstant(), ZONE);
+		AdjustableClock adjustableClock() {
+			return new AdjustableClock();
 		}
 
 	}
@@ -54,15 +87,19 @@ class TodayApiTest {
 	private MockMvc mvc;
 
 	@Autowired
+	private AdjustableClock clock;
+
+	@Autowired
 	private DayRepository days;
 
 	@Autowired
 	private ItemRepository items;
 
 	@BeforeEach
-	void emptyTheDatabase() {
+	void emptyTheDatabaseAndResetTheClock() {
 		items.deleteAllInBatch();
 		days.deleteAllInBatch();
+		clock.set(WEDNESDAY_EVENING);
 	}
 
 	@Test
@@ -87,6 +124,36 @@ class TodayApiTest {
 
 		assertThat(days.count()).isOne();
 		assertThat(items.count()).isEqualTo(13);
+	}
+
+	@Test
+	void keepsYesterdayUntilTheDayStartsAtFour() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+
+		clock.set(ZonedDateTime.of(2026, 10, 22, 0, 30, 0, 0, ZONE));
+
+		mvc.perform(get("/api/today"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.date").value("2026-10-21"))
+				.andExpect(jsonPath("$.now").value("2026-10-22T00:30:00+02:00"));
+
+		assertThat(days.count()).isOne();
+		assertThat(items.count()).isEqualTo(13);
+	}
+
+	@Test
+	void startsTheNewDayAtFour() throws Exception {
+		mvc.perform(get("/api/today")).andExpect(status().isOk());
+
+		clock.set(ZonedDateTime.of(2026, 10, 22, 4, 0, 0, 0, ZONE));
+
+		mvc.perform(get("/api/today"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.date").value("2026-10-22"))
+				// Donnerstag ist werktag_morgen + laufen, also 4 + 11 Punkte.
+				.andExpect(jsonPath("$.items.length()").value(15));
+
+		assertThat(days.count()).isEqualTo(2);
 	}
 
 	@Test

@@ -32,14 +32,18 @@ class TodayController {
 
 	private final Clock clock;
 
+	private final DayClock dayClock;
+
 	private final DayRepository days;
 
 	private final ItemRepository items;
 
 	private final Templates templates;
 
-	TodayController(Clock clock, DayRepository days, ItemRepository items, Templates templates) {
+	TodayController(Clock clock, DayClock dayClock, DayRepository days, ItemRepository items,
+			Templates templates) {
 		this.clock = clock;
+		this.dayClock = dayClock;
 		this.days = days;
 		this.items = items;
 		this.templates = templates;
@@ -49,14 +53,14 @@ class TodayController {
 	@GetMapping
 	@Transactional
 	public TodayResponse today() {
-		return respond(today(LocalDate.now(clock)));
+		return respond(today(dayClock.date()));
 	}
 
 	/** Der aktuelle Punkt ist jetzt erledigt. */
 	@PostMapping("next")
 	@Transactional
 	public TodayResponse next() {
-		DayEntity day = today(LocalDate.now(clock));
+		DayEntity day = today(dayClock.date());
 		ItemEntity current = items.findFirstByDayIdAndDoneAtIsNullOrderByPositionAsc(day.getId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
 						"Der Tag ist schon komplett erledigt."));
@@ -68,7 +72,7 @@ class TodayController {
 	@PostMapping("back")
 	@Transactional
 	public TodayResponse back() {
-		DayEntity day = today(LocalDate.now(clock));
+		DayEntity day = today(dayClock.date());
 		ItemEntity last = items.findFirstByDayIdAndDoneAtIsNotNullOrderByPositionDesc(day.getId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
 						"Heute ist noch kein Punkt erledigt."));
