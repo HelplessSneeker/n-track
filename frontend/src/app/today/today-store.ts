@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Service, inject } from '@angular/core';
 
 // Für die TODOs unten schon hereingeholt — noch benutzt sie keiner.
@@ -13,28 +13,7 @@ import { Item, Plan, Warning } from './plan';
 export class TodayStore {
   private readonly http = inject(HttpClient);
 
-  // ───────────────────────────────────────────────────────────────────────────────────────────────
-  // TODO(human) 1 — der Plan als httpResource
-  //
-  // Kontext: Der Service steht, `HttpClient` ist per `inject()` da, und `Plan` aus `./plan` ist der
-  //   fertige Typ zum Backend-Vertrag. Es fehlt der Einstiegspunkt: ein Feld, das den Plan hält.
-  //
-  // Aufgabe: Lege das Feld `plan` als `httpResource<Plan>` auf `/api/today` an. Import aus
-  //   `@angular/common/http`.
-  //
-  // Achtung:
-  //   - Der erste Parameter ist eine *Funktion*, die die URL liefert (`() => '/api/today'`), keine
-  //     URL. Nur so kann die Resource auf Signale reagieren — sie liest die Funktion in einem
-  //     reaktiven Kontext.
-  //   - Ohne `defaultValue` ist der Typ `Plan | undefined`. Überlege, ob dir `undefined` beim
-  //     Erstladen lieber ist als ein leerer Platzhalter-Plan; beides geht, aber es färbt jedes
-  //     abgeleitete Signal in TODO 2.
-  //   - Eine `httpResource` lädt **lazy**: solange niemand `value()` liest, fliegt keine Anfrage.
-  //     Das wird in den Tests wichtig.
-  //   - Was du bekommst: `value()`, `isLoading()`, `error()`, `status()`, `reload()` — und weil
-  //     `HttpResourceRef` ein `WritableResource` ist, auch `set()`. Letzteres wird in TODO 3 noch
-  //     interessant.
-  // ───────────────────────────────────────────────────────────────────────────────────────────────
+  readonly plan = httpResource<Plan>(() => '/api/today');
 
   // ───────────────────────────────────────────────────────────────────────────────────────────────
   // TODO(human) 2 — die abgeleiteten Signale
