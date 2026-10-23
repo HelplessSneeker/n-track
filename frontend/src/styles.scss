@@ -1,0 +1,83 @@
+/* Globale Grundlagen. Alles Weitere steht bei den Komponenten. */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f4f4f1;
+  --card: #ffffff;
+  --ink: #1b1c16;
+  --ink-soft: #5f6253;
+  --ink-faint: #8b8d80;
+  --line: #e3e3dc;
+  --accent: #2f6f3e;
+  --accent-hover: #26592f;
+  --accent-ink: #ffffff;
+  --warn-bg: #fdf1e1;
+  --warn-ink: #7c3e06;
+  --warn-line: #eec38c;
+
+  /* Die Trefferfläche am Handy: nicht unter 44px, sonst tippt man daneben. */
+  --tap: 44px;
+  --radius: 14px;
+  --gap: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141510;
+    --card: #1e1f19;
+    --ink: #f0f0e8;
+    --ink-soft: #b2b4a5;
+    --ink-faint: #82857a;
+    --line: #2e3028;
+    --accent: #58a86a;
+    --accent-hover: #6cbb7d;
+    --accent-ink: #10180f;
+    --warn-bg: #3a2a14;
+    --warn-ink: #f2c98a;
+    --warn-line: #5d431d;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Verhindert, dass iOS die Schrift im Querformat aufbläst. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Die Fußzeile des iPhones soll nichts verdecken. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Uhrzeiten mit gleich breiten Ziffern, damit die Spalte nicht zappelt. */
+.clock {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,11 +1,11 @@
 # n-track
 
 Tagesplaner: Der Server kennt den Tagesplan, weiß, welcher Punkt gerade dran ist, und rechnet die
-Uhrzeiten des restlichen Tages ab jetzt. Spring Boot 4.1.1, Java 21, PostgreSQL.
+Uhrzeiten des restlichen Tages ab jetzt. Spring Boot 4.1.1, Java 21, PostgreSQL, Angular 22.
 
 Jeder Tag entsteht aus einer Vorlage für seinen Wochentag. Abgehakt wird ein benannter Punkt, nicht
-„der aktuelle"; alles dahinter rückt nach. Angular, Login und Deploy kommen später; ab Schritt 1b
-plant ein Sprachmodell auf Zuruf um, die Regeln und Uhrzeiten rechnet aber immer der Server.
+„der aktuelle"; alles dahinter rückt nach. Login und Deploy kommen später; ab Schritt 1b plant ein
+Sprachmodell auf Zuruf um, die Regeln und Uhrzeiten rechnet aber immer der Server.
 
 ## Starten
 
@@ -24,6 +24,31 @@ Bauen und testen:
 
 Braucht ebenfalls Docker. Der Integrationstest läuft im Schema `test` derselben Datenbank, damit er
 den echten Tagesplan im Schema `public` nicht anfasst.
+
+## Frontend
+
+Die Jetzt-Ansicht in `frontend/`: Angular 22, standalone, zoneless, als PWA fürs Handy. Backend
+starten, dann in einem zweiten Terminal:
+
+```sh
+cd frontend
+npm start
+```
+
+Das ist `ng serve` auf <http://localhost:4200>. Der Dev-Server proxyt `/api` nach `localhost:8080`
+(`frontend/proxy.conf.json`) — das Backend hat kein CORS, ohne den Proxy geht es also nicht.
+
+```sh
+npx ng build
+npx ng test --watch=false
+```
+
+Getestet wird mit Vitest, dem Default von Angular 22; `--watch=false` ist nötig, im Terminal läuft
+`ng test` sonst im Watch-Mode. Der Service Worker ist im Dev abgeschaltet (`enabled: !isDevMode()`)
+und greift nur im Produktionsbuild.
+
+Die Ansicht entsteht als Angular-Übung von Hand. Die offenen Stellen sind mit `TODO(human)`
+markiert und in `frontend/AUFGABEN.md` aufgelistet.
 
 ## Die Rechenregeln in drei Sätzen
 
@@ -124,6 +149,14 @@ src/main/java/at/bfnoessler/ntrack/
 src/main/resources/
   vorlagen.yaml               die Tagesvorlagen
   db/migration/               Flyway; das Schema gehört Flyway, Hibernate prüft nur
+frontend/
+  AUFGABEN.md                 die offenen TODO(human)-Stellen der Jetzt-Ansicht
+  proxy.conf.json             /api nach localhost:8080, weil das Backend kein CORS hat
+  src/app/today/
+    plan.ts                     der Backend-Vertrag als Typen
+    today-store.ts              der Datenzugriff: httpResource, abhaken, zurücknehmen
+    today-page.*                der Container: Warnungen, Jetzt, Danach, Erledigt
+    warning-list.*  current-item.*  upcoming-list.*  done-list.*
 ```
 
 ## Nicht vergessen

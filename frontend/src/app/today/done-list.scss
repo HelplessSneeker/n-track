@@ -1,0 +1,61 @@
+.done {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.done__summary {
+  min-height: var(--tap);
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  align-items: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.done__list {
+  margin: 0;
+  padding: 0 0 0.3rem;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.done__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  color: var(--ink-faint);
+}
+
+.done__time {
+  flex: 0 0 3.2rem;
+  font-size: 0.9rem;
+}
+
+.done__title {
+  flex: 1;
+  text-decoration: line-through;
+  text-decoration-color: var(--line);
+}
+
+/* Klein und unauffällig: „Zurück" ist für Fehltipps, nicht für den Alltag. */
+.done__undo {
+  flex: 0 0 auto;
+  min-height: calc(var(--tap) - 10px);
+  padding: 0 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+
+  &:hover {
+    border-color: var(--ink-faint);
+    color: var(--ink);
+  }
+}

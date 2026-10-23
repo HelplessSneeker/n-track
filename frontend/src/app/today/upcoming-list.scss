@@ -1,0 +1,35 @@
+.next {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.next__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+
+  & + & {
+    border-top: 1px solid var(--line);
+  }
+}
+
+.next__time {
+  flex: 0 0 3.2rem;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  font-weight: 550;
+}
+
+.next__title {
+  color: var(--ink-soft);
+}
