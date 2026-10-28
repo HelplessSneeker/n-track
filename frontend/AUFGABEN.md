@@ -6,8 +6,7 @@ Spec-Dateien. `npx ng build` und `npx ng test --watch=false` laufen grün. Was f
 mit `TODO(human)` markiert; **das volle Briefing steht als Kommentar direkt an der Stelle**, hier
 nur die Reihenfolge und der Überblick.
 
-Für Claude gilt: an einer `TODO(human)`-Stelle **keinen Code schreiben**, auch nicht auf Nachfrage.
-Wenn ich hänge, will ich einen Hinweis auf die nächste Überlegung, nicht die Lösung.
+Für Claude gilt der Abschnitt „So hilfst du mir bei den TODO(human)" in `CLAUDE.md` daneben.
 
 ## Reihenfolge
 

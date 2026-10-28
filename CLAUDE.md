@@ -16,3 +16,6 @@ jetzt. Ab Schritt 1b plant ein Sprachmodell auf Zuruf um.
 
 - Regeln und Uhrzeiten rechnet der Server. Ein Sprachmodell (ab 1b) schlägt nur Änderungen vor; das
   Frontend zeigt an, was zurückkommt, und rechnet nichts nach.
+- Die Jetzt-Ansicht schreibt Benjamin als Übung selbst. An einer `TODO(human)`-Stelle gilt der
+  Abschnitt „So hilfst du mir bei den TODO(human)" ganz oben in `frontend/CLAUDE.md` — lies ihn,
+  bevor du dort etwas tust.
