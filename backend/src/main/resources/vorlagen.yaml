@@ -17,7 +17,7 @@ gym:
   - { titel: "Meditieren 3 min, danach Handy in einen anderen Raum", dauer: 3 }
   - { titel: "Deep Work", dauer: 60 }
   - titel: "Aufgaben aus der Daily, wenn noch Zeit ist"
-  - { titel: "Feierabend", um: "20:15" }
+  - { titel: "Feierabend", um: "21:00" }
   - { titel: "Hautpflege", um: "23:50", dauer: 10 }
   - { titel: "Im Bett", um: "24:00" }
 laufen:
@@ -29,7 +29,7 @@ laufen:
   - { titel: "Deep Work", dauer: 60 }
   - { titel: "Metalearning", dauer: 45 }
   - titel: "Aufgaben aus der Daily, wenn noch Zeit ist"
-  - { titel: "Feierabend", um: "20:15" }
+  - { titel: "Feierabend", um: "21:00" }
   - { titel: "Hautpflege", um: "23:50", dauer: 10 }
   - { titel: "Im Bett", um: "24:00" }
 samstag:

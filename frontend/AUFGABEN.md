@@ -92,7 +92,7 @@ Das Briefing pro Datei steht in der Datei; hier nur, was für alle drei gilt.
 - `vi.useFakeTimers()` für den Minutentakt, in `afterEach` `vi.useRealTimers()`. Räumt TODO 5 den
   Timer nicht über `DestroyRef` auf, beendet sich Vitest nicht.
 - Als Vorlage für echte Daten taugt `TodayApiTest.java` im Backend — die Mittwoch-Zahlen dort
-  (13 Punkte, `"Feierabend 20:15: 63 min zu spät"`, `minutesLate: 63`) sind geprüft.
+  (13 Punkte, `"Feierabend 21:00: 18 min zu spät"`, `minutesLate: 18`) sind geprüft.
 
 ## Nur aktuelle APIs: wo man leicht eine alte schreibt
 

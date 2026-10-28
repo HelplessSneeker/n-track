@@ -40,7 +40,7 @@
 //   die ersten drei erledigt. Dort geprüft: Index 3 ist `CURRENT` mit `end` = `17:30` (läuft, bis
 //   man tippt), Index 9 ist offen (`start` gesetzt, `end` fehlt), Index 10 ist „Feierabend", Index
 //   11 beginnt `23:50`, Index 12 liegt mit `2026-10-22T00:00:00+02:00` auf dem Folgetag. Eine
-//   Warnung: `minutesLate: 63`, `message: "Feierabend 20:15: 63 min zu spät"`.
+//   Warnung: `minutesLate: 18`, `message: "Feierabend 21:00: 18 min zu spät"`.
 //
 // Die Fehlertexte, wörtlich aus demselben Test:
 //   - 409 abhaken:      "Dieser Punkt ist noch nicht dran, offen ist: Aufstehen: wiegen, LSF"

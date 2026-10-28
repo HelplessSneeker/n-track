@@ -47,7 +47,7 @@ class TemplatesTest {
 		List<Item> items = templates.forDay(DayOfWeek.WEDNESDAY);
 
 		assertThat(items.get(10).title()).isEqualTo("Feierabend");
-		assertThat(items.get(10).fixedAt()).isEqualTo(TimeOfDay.of("20:15"));
+		assertThat(items.get(10).fixedAt()).isEqualTo(TimeOfDay.of("21:00"));
 		assertThat(items.get(12).title()).isEqualTo("Im Bett");
 		assertThat(items.get(12).fixedAt()).isEqualTo(TimeOfDay.of("24:00"));
 	}

@@ -184,10 +184,10 @@ class TodayApiTest {
 				.andExpect(jsonPath("$.items[12].start").value("2026-10-22T00:00:00+02:00"))
 				.andExpect(jsonPath("$.warnings.length()").value(1))
 				.andExpect(jsonPath("$.warnings[0].title").value("Feierabend"))
-				.andExpect(jsonPath("$.warnings[0].fixedAt").value("20:15"))
-				.andExpect(jsonPath("$.warnings[0].minutesLate").value(63))
+				.andExpect(jsonPath("$.warnings[0].fixedAt").value("21:00"))
+				.andExpect(jsonPath("$.warnings[0].minutesLate").value(18))
 				.andExpect(jsonPath("$.warnings[0].message")
-						.value("Feierabend 20:15: 63 min zu spät"));
+						.value("Feierabend 21:00: 18 min zu spät"));
 	}
 
 	@Test
