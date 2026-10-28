@@ -159,7 +159,8 @@ frontend/
     plan.ts                     der Backend-Vertrag als Typen
     today-store.ts              der Datenzugriff: httpResource, abhaken, zurücknehmen
     today-page.*                der Container: Warnungen, Jetzt, Danach, Erledigt
-    warning-list.*  current-item.*  upcoming-list.*  done-list.*
+    warning-list/  current-item/  upcoming-list/  done-list/
+                                je Komponente ein Ordner mit .ts, .html und .scss
 ```
 
 ## Nicht vergessen

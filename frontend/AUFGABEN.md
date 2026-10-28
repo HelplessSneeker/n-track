@@ -18,14 +18,14 @@ Wenn ich hänge, will ich einen Hinweis auf die nächste Überlegung, nicht die 
 | 3 | `src/app/today/today-store.ts` | `markDone`, `undoDone`, `busy`, `error` — und nach einem `409` neu laden |
 | 4 | `src/app/today/today-page.ts` + `.html` | Store injizieren, Inputs und Outputs verdrahten |
 | 5 | `src/app/today/today-page.ts` | einmal pro Minute nachladen |
-| 6 | `src/app/today/warning-list.ts` + `.html` | `warnings`-Input, `@for` |
-| 7 | `src/app/today/current-item.ts` + `.html` | `item`- und `busy`-Input, `next`-Output, Uhrzeit von–bis |
-| 7b | `src/app/today/current-item.ts` **oder** `today-page.*` | „ab 23:50" statt „Jetzt", wenn der Punkt erst später beginnt |
-| 8 | `src/app/today/upcoming-list.ts` + `.html` | `items`-Input, `@for`, Uhrzeit nur wo vorhanden |
-| 9 | `src/app/today/done-list.ts` + `.html` | `items`- und `busy`-Input, `undo`-Output, eingeklappt |
+| 6 | `src/app/today/warning-list/warning-list.ts` + `.html` | `warnings`-Input, `@for` |
+| 7 | `src/app/today/current-item/current-item.ts` + `.html` | `item`- und `busy`-Input, `next`-Output, Uhrzeit von–bis |
+| 7b | `src/app/today/current-item/current-item.ts` **oder** `today-page.*` | „ab 23:50" statt „Jetzt", wenn der Punkt erst später beginnt |
+| 8 | `src/app/today/upcoming-list/upcoming-list.ts` + `.html` | `items`-Input, `@for`, Uhrzeit nur wo vorhanden |
+| 9 | `src/app/today/done-list/done-list.ts` + `.html` | `items`- und `busy`-Input, `undo`-Output, eingeklappt |
 | 10a | `src/app/today/today-store.spec.ts` | die Tests zum Vertrag — siehe unten |
 | 10b | `src/app/today/today-page.spec.ts` | die Tests zum Container |
-| 10c | `src/app/today/current-item.spec.ts` | die Tests zur Uhrzeile und zum Knopf |
+| 10c | `src/app/today/current-item/current-item.spec.ts` | die Tests zur Uhrzeile und zum Knopf |
 
 1 bis 3 zuerst: ohne den Store hat der Container nichts zu binden. Danach 4, dann die
 Kindkomponenten 6 bis 9 in beliebiger Reihenfolge, dann 5 und 7b, dann die Tests.

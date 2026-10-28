@@ -11,7 +11,7 @@ export class WarningList {
   // ───────────────────────────────────────────────────────────────────────────────────────────────
   // TODO(human) 6 — die Warnungen
   //
-  // Kontext: `plan.warnings` ist eine Liste von `Warning` (siehe `./plan`). Diese Komponente zeigt
+  // Kontext: `plan.warnings` ist eine Liste von `Warning` (siehe `../plan`). Diese Komponente zeigt
   //   sie nur an, sie entscheidet nichts. Im Template wartet `<ul class="warnings">`.
   //
   // Aufgabe: Ein `warnings`-Input, dazu im Template das `@for` darüber.

@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
-import { CurrentItem } from './current-item';
-import { DoneList } from './done-list';
-import { UpcomingList } from './upcoming-list';
-import { WarningList } from './warning-list';
+import { CurrentItem } from './current-item/current-item';
+import { DoneList } from './done-list/done-list';
+import { UpcomingList } from './upcoming-list/upcoming-list';
+import { WarningList } from './warning-list/warning-list';
 
 /**
  * Die Jetzt-Ansicht. Der einzige Ort, der den Store kennt — die vier Kindkomponenten bekommen
