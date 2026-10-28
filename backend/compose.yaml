@@ -1,3 +1,7 @@
+# Der Projektname steht hier, weil Compose ihn sonst vom Ordner nimmt ("backend") und
+# Spring beim Start eine zweite, leere Datenbank hochzieht.
+name: n-track
+
 services:
   postgres:
     image: 'postgres:latest'

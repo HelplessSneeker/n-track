@@ -35,7 +35,7 @@
 //   - Spies sind `vi.fn()` — Vitest, nicht Jasmine. `vitest/globals` ist in `tsconfig.spec.json`
 //     eingetragen, `describe`/`it`/`expect` brauchst du nicht zu importieren.
 //
-// Echte Daten: `src/test/java/at/bfnoessler/ntrack/today/TodayApiTest.java` im Backend, Methode
+// Echte Daten: `backend/src/test/java/at/bfnoessler/ntrack/today/TodayApiTest.java`, Methode
 //   `countsTheRestOfTheDayFromNowOnceWorkIsTheCurrentItem` — Mittwoch, 2026-10-21 17:30, 13 Punkte,
 //   die ersten drei erledigt. Dort geprüft: Index 3 ist `CURRENT` mit `end` = `17:30` (läuft, bis
 //   man tippt), Index 9 ist offen (`start` gesetzt, `end` fehlt), Index 10 ist „Feierabend", Index

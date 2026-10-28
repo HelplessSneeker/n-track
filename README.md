@@ -9,9 +9,11 @@ Sprachmodell auf Zuruf um, die Regeln und Uhrzeiten rechnet aber immer der Serve
 
 ## Starten
 
-Docker muss laufen — die Datenbank kommt aus `compose.yaml` und wird beim Start mitgestartet.
+Docker muss laufen — die Datenbank kommt aus `backend/compose.yaml` und wird beim Start
+mitgestartet.
 
 ```sh
+cd backend
 ./mvnw spring-boot:run
 curl localhost:8080/api/today
 ```
@@ -19,6 +21,7 @@ curl localhost:8080/api/today
 Bauen und testen:
 
 ```sh
+cd backend
 ./mvnw verify
 ```
 
@@ -114,7 +117,7 @@ wiederholter Versuch bei schlechtem Netz trifft denselben.
 
 ## Vorlagen
 
-`src/main/resources/vorlagen.yaml`, von Hand gepflegt. Ein Punkt hat `titel` und optional `dauer`
+`backend/src/main/resources/vorlagen.yaml`, von Hand gepflegt. Ein Punkt hat `titel` und optional `dauer`
 (Minuten) oder `um` (feste Uhrzeit); ohne beides ist er offen. Die Anführungszeichen um die
 Uhrzeiten sind tragend — ohne sie liest YAML `20:15` als Zahl.
 
@@ -130,7 +133,7 @@ Die Zuordnung steht in `Templates.java`.
 ## Aufbau
 
 ```
-src/main/java/at/bfnoessler/ntrack/
+backend/src/main/java/at/bfnoessler/ntrack/
   NTrackApplication.java      Start
   TimeConfig.java             die Clock-Bean, auf die Minute genau, Europe/Vienna
   schedule/                   die Rechenschicht: rein, ohne Spring, ohne Datenbank
@@ -146,7 +149,7 @@ src/main/java/at/bfnoessler/ntrack/
     Templates.java              vorlagen.yaml, beim Start eingelesen
     DayEntity.java  ItemEntity.java  DayRepository.java  ItemRepository.java
     TodayResponse.java  ItemResponse.java  WarningResponse.java
-src/main/resources/
+backend/src/main/resources/
   vorlagen.yaml               die Tagesvorlagen
   db/migration/               Flyway; das Schema gehört Flyway, Hibernate prüft nur
 frontend/
