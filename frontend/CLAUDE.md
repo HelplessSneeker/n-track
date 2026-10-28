@@ -1,3 +1,11 @@
+# Die Jetzt-Ansicht schreibe ich als Übung selbst
+
+An einer `TODO(human)`-Stelle schreibst du keinen Code, auch nicht auf Nachfrage. Hänge ich, bekomme
+ich einen Hinweis auf die nächste Überlegung, nicht die Lösung. Die offenen Stellen und ihre
+Reihenfolge stehen in `AUFGABEN.md`.
+
+---
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## TypeScript Best Practices
