@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CurrentItem } from './current-item/current-item';
 import { DoneList } from './done-list/done-list';
 import { UpcomingList } from './upcoming-list/upcoming-list';
 import { WarningList } from './warning-list/warning-list';
+import { TodayStore } from './today-store';
 
 /**
  * Die Jetzt-Ansicht. Der einzige Ort, der den Store kennt — die vier Kindkomponenten bekommen
@@ -19,26 +20,21 @@ export class TodayPage {
   // ───────────────────────────────────────────────────────────────────────────────────────────────
   // TODO(human) 4 — zusammenstecken
   //
-  // Kontext: Die vier Kindkomponenten stehen, das Template hat die Abschnitte in der richtigen
-  //   Reihenfolge — Warnungen, Jetzt, Danach, Erledigt — und an jeder Binding-Stelle einen
-  //   Kommentar. Es fehlt die Verdrahtung.
+  // Kontext: Das Gate auf `plan.value()` steht, die Abschnitte stehen in der richtigen Reihenfolge
+  //   — Warnungen, Jetzt, Danach, Erledigt — und an jeder Binding-Stelle steht ein Kommentar. Es
+  //   fehlt die Verdrahtung der Kinder.
   //
-  // Aufgabe: Den Store injizieren, seine Signale an die Kind-Inputs binden, die Outputs auf
-  //   `markDone`/`undoDone` legen, und oben das Datum des Tages anzeigen.
+  // Aufgabe: Die Signale des Stores an die Kind-Inputs binden und die Outputs auf
+  //   `markDone`/`undoDone` legen.
   //
   // Achtung:
-  //   - Für „Jetzt" brauchst du ein `@if` mit einem `@else`-Zweig („Alles erledigt") — es *kann*
-  //     keinen aktuellen Punkt geben. Denk an `@if (store.current(); as item)`, dann musst du im
-  //     Zweig kein `!` schreiben.
-  //   - Den Tagestitel aus `plan().date` nehmen, **nie** aus `now`: `ntrack.day-starts-at` ist
-  //     `04:00`, zwischen 00:00 und 03:59 gilt noch der Vortag. Genau das soll die Ansicht um
-  //     00:10 auch zeigen.
-  //   - Lade- und Fehlerzustand: beim allerersten Aufruf ist noch kein Plan da, und `GET
-  //     /api/today` kann scheitern (Backend aus, Docker aus). Überleg, was die Ansicht dann zeigt —
-  //     ein leerer Bildschirm ist die schlechteste Antwort.
   //   - Das `error`-Signal aus TODO 3 gehört auch hierher: wenn der Server einen Tipp mit `409`
-  //     ablehnt, soll der Nutzer die Begründung lesen.
+  //     ablehnt, soll der Nutzer die Begründung lesen. Erst mit den Knöpfen aus TODO 7 und 9 kann
+  //     es überhaupt gesetzt werden — deshalb hier zurückgestellt, nicht vergessen.
   //
+
+  protected readonly today = inject(TodayStore);
+
   // ───────────────────────────────────────────────────────────────────────────────────────────────
   // TODO(human) 5 — einmal pro Minute nachladen
   //

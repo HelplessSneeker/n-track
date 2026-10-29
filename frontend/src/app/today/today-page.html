@@ -1,41 +1,54 @@
 <main class="page">
-  <header class="page__head">
-    <h1 class="page__title">n-track</h1>
-    <p class="page__date">
-      <!-- TODO(human) 4 — das Datum aus plan().date. Nicht aus now ableiten. -->
-    </p>
-  </header>
+  @if (this.today.plan.value(); as plan) {
+    <header class="page__head">
+      <h1 class="page__title">n-track</h1>
+      <p class="page__date">
+        {{ plan.date }}
+      </p>
+    </header>
 
-  <!-- TODO(human) 4 — die Warnungen binden. -->
-  <app-warning-list />
+    @if (this.today.warnings().length > 0) {
+      <app-warning-list />
+    }
 
-  <section class="page__section" aria-labelledby="now-heading">
-    <!--
+    <section class="page__section" aria-labelledby="now-heading">
+      <!--
       TODO(human) 7b — „Jetzt" stimmt nur, wenn der Punkt schon läuft. Beginnt er später (Hautpflege
       fest auf 23:50), gehört „ab 23:50" hierher. Der Vergleich braucht plan().now; ob das Label
       hier entsteht oder in app-current-item, entscheidest du — das Briefing steht in
       current-item.ts.
     -->
-    <h2 class="page__heading" id="now-heading">Jetzt</h2>
+      <h2 class="page__heading" id="now-heading">Jetzt</h2>
+
+      <!--
+      TODO(human) 4 — an app-current-item gehen der Punkt und busy, zurück kommt die id zum Abhaken.
+    -->
+      @if (this.today.current()) {
+        <app-current-item />
+      } @else {
+        <p>Alles erledigt</p>
+      }
+    </section>
+
+    @if (this.today.upcoming().length > 0) {
+      <section class="page__section" aria-labelledby="next-heading">
+        <h2 class="page__heading" id="next-heading">Danach</h2>
+        <app-upcoming-list />
+      </section>
+    }
 
     <!--
-      TODO(human) 4 — hier das @if auf den aktuellen Punkt, mit @else „Alles erledigt".
-      An app-current-item gehen der Punkt und busy, zurück kommt die id zum Abhaken.
-    -->
-    <app-current-item />
-  </section>
-
-  <section class="page__section" aria-labelledby="next-heading">
-    <h2 class="page__heading" id="next-heading">Danach</h2>
-
-    <!-- TODO(human) 4 — die kommenden Punkte binden. -->
-    <app-upcoming-list />
-  </section>
-
-  <!--
     TODO(human) 4 — die erledigten Punkte binden, undo auf den Store legen.
     busy geht auch hier hinein: „Zurück" ist während einer laufenden Anfrage ebenso gesperrt wie
     „Weiter". Der Grund steht in done-list.ts.
   -->
-  <app-done-list />
+    @if (this.today.done().length > 0) {
+      <app-done-list />
+    }
+  } @else if (this.today.plan.error()) {
+    <p>Backend nicht erreichbar</p>
+    <button type="button" (click)="this.today.plan.reload()">Nochmal versuchen</button>
+  } @else {
+    <p>Keinen Plan für heute</p>
+  }
 </main>
