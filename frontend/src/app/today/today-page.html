@@ -1,9 +1,9 @@
 <main class="page">
-  @if (this.today.plan.value(); as plan) {
+  @if (this.today.plan.hasValue()) {
     <header class="page__head">
       <h1 class="page__title">n-track</h1>
       <p class="page__date">
-        {{ plan.date }}
+        {{ this.today.plan.value().date }}
       </p>
     </header>
 
