@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { Warning } from '../plan';
 
 /** Die Warnungen über fest terminierte Punkte, die nicht mehr zu halten sind. Ganz oben. */
 @Component({
@@ -28,4 +29,5 @@ export class WarningList {
   //   - Das Ganze ist eine Warnung für Nutzer, kein Fehler: `role="alert"` wäre zu laut, weil die
   //     Liste sich minütlich neu aufbaut. Überleg, ob `aria-live="polite"` hier passt.
   // ───────────────────────────────────────────────────────────────────────────────────────────────
+  readonly warnings = input.required<readonly Warning[]>();
 }

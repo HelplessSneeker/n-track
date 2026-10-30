@@ -4,4 +4,9 @@
     Eine Warnung ist ein <li class="warnings__item">, der Text ist {{ warning.message }}.
     Das Briefing steht in warning-list.ts.
   -->
+  @for (warning of warnings(); track warning.fixedAt + '|' + warning.title) {
+    <li class="warnings__item">
+      {{ warning.message }}
+    </li>
+  }
 </ul>

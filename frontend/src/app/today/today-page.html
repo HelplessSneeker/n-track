@@ -8,7 +8,7 @@
     </header>
 
     @if (this.today.warnings().length > 0) {
-      <app-warning-list />
+      <app-warning-list [warnings]="this.today.warnings()" />
     }
 
     <section class="page__section" aria-labelledby="now-heading">
@@ -20,9 +20,6 @@
     -->
       <h2 class="page__heading" id="now-heading">Jetzt</h2>
 
-      <!--
-      TODO(human) 4 — an app-current-item gehen der Punkt und busy, zurück kommt die id zum Abhaken.
-    -->
       @if (this.today.current()) {
         <app-current-item />
       } @else {
@@ -37,11 +34,6 @@
       </section>
     }
 
-    <!--
-    TODO(human) 4 — die erledigten Punkte binden, undo auf den Store legen.
-    busy geht auch hier hinein: „Zurück" ist während einer laufenden Anfrage ebenso gesperrt wie
-    „Weiter". Der Grund steht in done-list.ts.
-  -->
     @if (this.today.done().length > 0) {
       <app-done-list />
     }
